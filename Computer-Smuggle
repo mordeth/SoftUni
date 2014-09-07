@@ -1,0 +1,79 @@
+$parts = $_GET['list'];
+
+$parts = str_replace(' ', '', $parts);
+
+$partsArray = explode(',', $parts);
+
+$groupedParts = [];
+foreach($partsArray as $part) {
+	if(!empty($part)) {
+		if(!isset($groupedParts[$part])) {
+			$groupedParts[$part] = 0;
+		}
+		
+		$groupedParts[$part]++;
+	}
+}
+
+$prices = array(
+	'CPU' => '85',
+	'RAM' => '35',
+	'VIA' => '45',
+	'ROM' => '45',
+);
+
+$totalPartsPrice = get_total_price($groupedParts, $prices);
+
+$computers = $leftParts = $profit = $leftPartsPrice = 0;
+
+$minComputers = min($groupedParts);
+
+for($i = 0; $i < $minComputers; $i++) {
+	if((isset($groupedParts['CPU']) && $groupedParts['CPU'] > 0) && 
+		(isset($groupedParts['RAM']) && $groupedParts['RAM'] > 0) &&
+		(isset($groupedParts['VIA']) && $groupedParts['VIA'] > 0) &&
+		(isset($groupedParts['ROM']) && $groupedParts['ROM'] > 0)) {
+		
+		$computers++;
+		$groupedParts['CPU']--;
+		$groupedParts['RAM']--;
+		$groupedParts['VIA']--;
+		$groupedParts['ROM']--;
+	}
+}
+
+foreach($groupedParts as $key=>$leftPart) {
+	$leftParts += $leftPart;
+	$leftPartsPrice += $leftPart * ($prices[$key] / 2);
+}
+
+echo '<ul>';
+echo '<li>'.$computers.' computers assembled</li>';
+echo '<li>'.$leftParts.' parts left</li>';
+echo '</ul>';
+
+$income = ($computers * 420) + $leftPartsPrice;
+
+$profit = $income - $totalPartsPrice;
+if($profit > 0) {
+	echo '<p>Nakov gained '.$profit.' leva</p>';
+} else {
+	echo '<p>Nakov lost '. $profit.' leva</p>';
+}
+
+function get_total_price($parts, $prices) {
+	
+	$total = 0;
+	
+	foreach($parts as $key=>$part) {
+		if($part > 4) {
+			$total += $part * ($prices[$key] / 2);
+		} else {
+			$total += $part * $prices[$key];
+		}
+	}
+	
+	return $total;
+}
+
+?>
